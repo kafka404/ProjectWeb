@@ -1,4 +1,3 @@
-<?php include 'koneksi.php'; ?>
 <!DOCTYPE html>
 <html lang="id">
 
@@ -10,7 +9,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
   <link rel="stylesheet" href="style.css">
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-  
+
 </head>
 
 <body>
@@ -22,7 +21,7 @@
       </button>
       <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
         <ul class="navbar-nav">
-          <li class="nav-item"><a class="nav-link active" href="#">Daftar dulu kids</a></li>
+          <li class="nav-item"><a class="nav-link active"></a></li>
         </ul>
       </div>
     </div>
@@ -30,32 +29,31 @@
 
   <section class="hero text-center text-light d-flex align-items-center justify-content-center">
     <div class="animate__animated animate__fadeInUp">
-    <h1 class="display-4 fw-bold">Register</h1>
-    <form action="login.php" method="post">
-            <div class="mb-3">
-                <label for="name" class="form-label">Nama Lengkap</label>
-                <input type="text" name="nm" class="form-control" id="formGroupExampleInput">
-              </div>
-              <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
-                <input type="text" name="usn" class="form-control" id="formGroupExampleInput2">
-              </div>
-              <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" name="pwd" class="form-control" id="formGroupExampleInput">
-              </div>
-              <div class="mb-3">
-                <label for="konfpassword" class="form-label">Konfirmasi Password</label>
-                <input type="password" class="form-control" id="formGroupExampleInput2">
-              </div>
-              <div class="mb-3">
-                <button type="submit" name="register" class="btn btn-dark">Register</button>
-                <button type="button" class="btn btn-secondary">Kembali</button>
-              </div>
-        </form>
+      <h1 class="display-4 fw-bold">Register</h1>
+      <form method="post">
         <div class="mb-3">
-          Sudah punya akun? <a href="login.php" class="link-secondary">Login di sini</a>
+          <label for="name" class="form-label">Nama Lengkap</label>
+          <input type="text" name="nm" class="form-control" id="formGroupExampleInput">
         </div>
+        <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <input type="text" name="usn" class="form-control" id="formGroupExampleInput2">
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" name="pwd" class="form-control" id="formGroupExampleInput">
+        </div>
+        <div class="mb-3">
+          <label for="konfpassword" class="form-label">Konfirmasi Password</label>
+          <input type="password" name="konf" class="form-control" id="formGroupExampleInput2">
+        </div>
+        <div class="mb-3">
+          <button type="submit" name="register" class="btn btn-dark">Register</button>
+        </div>
+      </form>
+      <div class="mb-3">
+        Sudah punya akun? <a href="login.php" class="link-secondary">Login di sini</a>
+      </div>
     </div>
   </section>
 
@@ -82,25 +80,36 @@
 </html>
 
 <?php
+include "koneksi.php";
 
-if (isset($register)) {
-$nama = $_POST['nm']; 
-$username = $_POST['usn'];
-$password = $_POST['pwd'];
+if (isset($_POST['register'])) {
 
+  $nama = $_POST['nm'];
+  $username = $_POST['usn'];
+  $password = $_POST['pwd'];
+  $konfirmasi = $_POST['konf'];
 
-$query = mysqli_query($conn, "INSERT INTO users(nama_lengkap, username, password) VALUES ('$nama', '$username', '$password')");
+  // Validasi password
+  if ($password !== $konfirmasi) {
+    header("Location: register.php?pesan=konfirmasi_salah");
+    exit;
+  }
 
-var_dump($nama, $username, $password, $query);
+  $role = 'user';
 
-$cek = mysqli_num_rows($query);
+  // Insert ke database
+  $query = mysqli_query($conn, "INSERT INTO users (username, password, nama_lengkap, konfirmasi, role)
+  VALUES ('$username', '$password', '$nama', '$konfirmasi', '$role')
+  ");
+  
 
-if ($cek > 0) {
+  if ($query) {
     session_start();
     $_SESSION['dataDiri'] = $username;
-    header('location:login.php');
-} else {
-    header('location:register.php?pesan=gagal');
-}
+    header("Location: login.php");
+    exit;
+  } else {
+    echo "Query Error: " . mysqli_error($conn);
+  }
 }
 ?>

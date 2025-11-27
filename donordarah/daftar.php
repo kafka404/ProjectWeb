@@ -1,32 +1,80 @@
 <?php
+session_start();
 include 'koneksi.php';
 
-// Proses form pendaftaran
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nama = $_POST['nama'];
-    $nomor_wa = $_POST['nomor_wa'];
-    $pekerjaan = $_POST['pekerjaan'];
-    $riwayat_penyakit = $_POST['riwayat_penyakit'];
-    $gaya_hidup = $_POST['gaya_hidup'];
-    $tinggi_badan = $_POST['tinggi_badan'];
-    $berat_badan = $_POST['berat_badan'];
-    $jenis_kelamin = $_POST['jenis_kelamin'];
-    $tanggal_lahir = $_POST['tahun'] . '-' . str_pad($_POST['bulan'], 2, '0', STR_PAD_LEFT) . '-' . str_pad($_POST['tanggal'], 2, '0', STR_PAD_LEFT); // Gabung jadi DATE
-    $alamat = $_POST['alamat'];
 
-    $stmt = $conn->prepare("INSERT INTO pendaftaran (nama, nomor_wa, pekerjaan, riwayat_penyakit, gaya_hidup, tinggi_badan, berat_badan, jenis_kelamin, tanggal_lahir, alamat) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssssiisss", $nama, $nomor_wa, $pekerjaan, $riwayat_penyakit, $gaya_hidup, $tinggi_badan, $berat_badan, $jenis_kelamin, $tanggal_lahir, $alamat);
-    if ($stmt->execute()) {
-        $success = "Pendaftaran berhasil! Kami akan menghubungi Anda segera.";
-    } else {
-        $error = "Gagal mendaftar: " . $conn->error;
-    }
-    $stmt->close();
+  $nama = $_POST['nm'];
+  $nomor_wa = $_POST['no_wa'];
+  $pekerjaan = $_POST['pekerjaan'];
+  $riwayat_penyakit = $_POST['riwayat_penyakit'];
+  $gol_darah = $_POST['gol_d'];
+  $gaya_hidup = $_POST['gaya_hidup'];
+  $tinggi_badan = $_POST['tinggi_badan'];
+  $berat_badan = $_POST['berat_badan'];
+  $jenis_kelamin = $_POST['jenis_kelamin'];
+  $tanggal_lahir = $_POST['tahun'] . '-' . str_pad($_POST['bulan'], 2, '0', STR_PAD_LEFT) . '-' . str_pad($_POST['tanggal'], 2, '0', STR_PAD_LEFT);
+  $alamat = $_POST['alamat'];
+  $daerah = $_POST['daerah'];
+  $lokasi_donor = $_POST['lokasi_donor'];
+  $tanggal_donor = $_POST['tanggal_donor'];
+  $waktu_donor = $_POST['waktu_donor'];
+
+
+  $jadwalRumahSakit = [
+    "sleman" => "RSUD Sleman",
+    "yogyakarta" => "RSUD Kota Yogyakarta",
+    "jakarta" => "RSUD Pasar Minggu",
+    "surabaya" => "RSUD Dr. Soetomo",
+    "bandung" => "RSUD Ujung Berung"
+  ];
+
+
+  $stmt = $conn->prepare("INSERT INTO pendaftaran 
+  (user_id, nama, nomor_wa, pekerjaan, riwayat_penyakit, golongan_darah, gaya_hidup, tinggi_badan, berat_badan, jenis_kelamin, tanggal_lahir, alamat, daerah, lokasi_donor, tanggal_donor, waktu_donor)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+  $stmt->bind_param(
+    "issssssiisssssss",
+    $_SESSION['user_id'],
+    $nama,
+    $nomor_wa,
+    $pekerjaan,
+    $riwayat_penyakit,
+    $gol_darah,
+    $gaya_hidup,
+    $tinggi_badan,
+    $berat_badan,
+    $jenis_kelamin,
+    $tanggal_lahir,
+    $alamat,
+    $daerah,
+    $lokasi_donor,
+    $tanggal_donor,
+    $waktu_donor
+  );
+
+
+
+  if ($stmt->execute()) {
+    $success = "Pendaftaran berhasil!";
+
+    // Ambil ID pendaftar yang baru dibuat
+    $pendaftarID = $conn->insert_id;
+    $_SESSION['pendaftar_id'] = $pendaftarID;
+
+    // Buat jadwal menggunakan ID pendaftar jika perlu
+    $conn->query("INSERT INTO jadwal (tanggal, waktu, deskripsi, daerah)
+    VALUES ('$tanggal_donor', '$waktu_donor', 'Jadwal donor otomatis dari pendaftaran', '$daerah')");
+
+  }
 }
 ?>
 
+
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -36,6 +84,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   <link rel="stylesheet" href="style.css">
 
 </head>
+<style>
+  .hero {
+    background: linear-gradient(135deg, rgba(198, 40, 40, 0.8), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1603398938378-e54eab4466cb?auto=format&fit=crop&w=1200&q=60') center/cover no-repeat;
+    height: 50vh;
+    position: relative;
+    animation: fadeIn 1.5s ease-in-out;
+  }
+</style>
+
 <body>
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
     <div class="container">
@@ -46,10 +103,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
         <ul class="navbar-nav">
           <li class="nav-item"><a class="nav-link" href="beranda.php">Beranda</a></li>
-          <li class="nav-item"><a class="nav-link" href="about.html">Tentang</a></li>
+          <li class="nav-item"><a class="nav-link" href="about.php">Tentang</a></li>
           <li class="nav-item"><a class="nav-link" href="jadwal.php">Jadwal</a></li>
-          <li class="nav-item"><a class="nav-link" href="artikel.php">Artikel</a></li>
-          <li class="nav-item"><a class="nav-link active" href="Daftar.php">Daftar</a></li>
+          <li class="nav-item"><a class="nav-link active" href="daftar.php">Daftar</a></li>
+          <li class="nav-item"><a class="nav-link" href="logout.php">Logout</a></li>
         </ul>
       </div>
     </div>
@@ -77,7 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                   <b style="font-size: 14px;">Nama Lengkap</b>
                 </div>
                 <div class="col">
-                  <input type="text" class="form-control form-control-sm" name="nama" placeholder="Sesuai Dengan KK" required>
+                  <input type="text" class="form-control form-control-sm" name="nm" placeholder="Sesuai Dengan KK" required>
                 </div>
               </div>
 
@@ -87,7 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                   <b style="font-size: 14px;">No. Telepon</b>
                 </div>
                 <div class="col">
-                  <input type="text" class="form-control form-control-sm" name="nomor_wa" placeholder="08xxxxxxxxxx" required>
+                  <input type="text" class="form-control form-control-sm" name="no_wa" placeholder="08xxxxxxxxxx" required>
                 </div>
               </div>
 
@@ -108,6 +165,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
                 <div class="col">
                   <textarea class="form-control form-control-sm" name="riwayat_penyakit" rows="2"></textarea>
+                </div>
+              </div>
+              
+              <!-- Golongan Darah -->
+              <div class="row mb-3">
+                <div class="col-4">
+                  <b style="font-size: 14px;">Gol. Darah</b>
+                </div>
+                <div class="col">
+                  <select class="form-select form-select-sm" name="gol_d" required>
+                    <option>----</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="AB">AB</option>
+                    <option value="O">O</option>
+                  </select>
                 </div>
               </div>
 
@@ -167,6 +240,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
               </div>
 
+              <!-- Daerah -->
+              <div class="mb-3">
+                <label><b style="font-size: 14px;">Daerah Anda</b></label>
+                <input type="text" name="daerah" class="form-control" placeholder="Contoh: Sleman">
+              </div>
+
               <!-- Alamat Lengkap -->
               <div class="row mb-3">
                 <div class="col-4">
@@ -177,6 +256,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
               </div>
 
+              <!-- Ambil Lokasi -->
+              <div class="row mb-3">
+                <div class="col-4">
+                  <b style="font-size: 14px;">Lokasi Donor</b>
+                </div>
+                <div class="col">
+                  <input type="text" id="lokasi_otomatis" class="form-control form-control-sm" name="lokasi_donor" readonly>
+                </div>
+              </div>
+
+              <!-- Tanggal Donor -->
+              <div class="row mb-3">
+                <div class="col-4">
+                  <b style="font-size: 14px;">Pilih Tanggal Donor</b>
+                </div>
+                <div class="col">
+                  <input type="date" class="form-control form-control-sm" name="tanggal_donor" required>
+                </div>
+              </div>
+              <!-- Waktu Donor -->
+              <div class="row mb-3">
+                <div class="col-4">
+                  <b style="font-size: 14px;">Pilih Waktu</b>
+                </div>
+                <div class="col">
+                  <select class="form-select form-select-sm" name="waktu_donor" required>
+                    <option value="08:00 - 10:00">08:00 - 10:00</option>
+                    <option value="10:00 - 12:00">10:00 - 12:00</option>
+                    <option value="13:00 - 15:00">13:00 - 15:00</option>
+                  </select>
+                </div>
+              </div>
+
+
+
               <button type="submit" class="btn btn-danger w-100">Daftar Sekarang</button>
             </form>
           </div>
@@ -185,9 +299,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
   </section>
 
-  <footer class="bg-dark text-white text-center py-3 mt-5">
-    <p class="mb-0">© <?php echo date("Y"); ?> DonorDarah — Dibuat dengan ❤️ untuk kemanusiaan.</p>
-  </footer>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="assets/js/script.js"></script>
   <script>
@@ -200,6 +311,72 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     });
     document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
   </script>
+  <script>
+    document.querySelector("input[name='daerah']").addEventListener("input", function() {
+      const daerah = this.value.toLowerCase();
+
+      const mapping = {
+        "sleman": "RSUD Sleman",
+        "yogyakarta": "RSUD Kota Yogyakarta",
+        "jakarta": "RSUD Pasar Minggu",
+        "surabaya": "RSUD Dr. Soetomo",
+        "bandung": "RSUD Ujung Berung"
+      };
+
+      let lokasi = "RSUD Terdekat";
+      for (let key in mapping) {
+        if (daerah.includes(key)) {
+          lokasi = mapping[key];
+        }
+      }
+
+      document.getElementById("lokasi_otomatis").value = lokasi;
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
+
 </html>
-<?php $conn->close(); ?>
+
+<?php
+if (isset($_SESSION['user_id'])) {
+
+    $uid = $_SESSION['user_id'];
+
+    // Ambil data pendaftaran terbaru milik user
+    $cek = $conn->query("SELECT * FROM pendaftaran WHERE user_id='$uid' ORDER BY id DESC LIMIT 1");
+
+    if ($cek && $cek->num_rows > 0) {
+        $d = $cek->fetch_assoc();
+        ?>
+
+        <div class="container my-4">
+            <div class="card shadow p-4 border-0">
+                <h4 class="fw-bold text-danger mb-3">Jadwal Donor Anda</h4>
+
+                <p><b>Nama:</b> <?= htmlspecialchars($d['nama']) ?></p>
+                <p><b>Tanggal:</b> <?= htmlspecialchars($d['tanggal_donor']) ?></p>
+                <p><b>Waktu:</b> <?= htmlspecialchars($d['waktu_donor']) ?></p>
+                <p><b>Lokasi:</b> <?= htmlspecialchars($d['lokasi_donor']) ?></p>
+
+                <div class="mt-3 d-flex gap-2">
+                    <a href="editPendaftar.php?id=<?= $d['id'] ?>" 
+                       class="btn btn-warning btn-sm px-4">
+                       ✏ Edit
+                    </a>
+
+                    <a href="hapusPendaftar.php?id=<?= $d['id'] ?>"
+                       class="btn btn-danger btn-sm px-4"
+                       onclick="return confirm('Yakin ingin menghapus data jadwal donor?');">
+                       ✔ Selesai
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <?php
+    }
+}
+?>
+
+

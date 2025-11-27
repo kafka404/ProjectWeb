@@ -23,10 +23,10 @@
       <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
         <ul class="navbar-nav">
           <li class="nav-item"><a class="nav-link" href="beranda.php">Beranda</a></li>
-          <li class="nav-item"><a class="nav-link active" href="about.html">Tentang</a></li>
+          <li class="nav-item"><a class="nav-link active" href="about.php">Tentang</a></li>
           <li class="nav-item"><a class="nav-link" href="jadwal.php">Jadwal</a></li>
-          <li class="nav-item"><a class="nav-link" href="artikel.php">Artikel</a></li>
-          <li class="nav-item"><a class="nav-link" href="Daftar.php">Daftar</a></li>
+          <li class="nav-item"><a class="nav-link" href="daftar.php">Daftar</a></li>
+          <li class="nav-item"><a class="nav-link" href="logout.php">Logout</a></li>
         </ul>
       </div>
     </div>
