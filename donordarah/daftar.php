@@ -20,16 +20,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $tanggal_donor = $_POST['tanggal_donor'];
   $waktu_donor = $_POST['waktu_donor'];
 
-
-  $jadwalRumahSakit = [
-    "sleman" => "RSUD Sleman",
-    "yogyakarta" => "RSUD Kota Yogyakarta",
-    "jakarta" => "RSUD Pasar Minggu",
-    "surabaya" => "RSUD Dr. Soetomo",
-    "bandung" => "RSUD Ujung Berung"
-  ];
-
-
   $stmt = $conn->prepare("INSERT INTO pendaftaran 
   (user_id, nama, nomor_wa, pekerjaan, riwayat_penyakit, golongan_darah, gaya_hidup, tinggi_badan, berat_badan, jenis_kelamin, tanggal_lahir, alamat, daerah, lokasi_donor, tanggal_donor, waktu_donor)
   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -378,5 +368,6 @@ if (isset($_SESSION['user_id'])) {
     }
 }
 ?>
+
 
 
