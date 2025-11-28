@@ -21,7 +21,7 @@ if (mysqli_num_rows($cek) == 0) {
 // Hapus data pendaftaran
 mysqli_query($conn, "DELETE FROM pendaftaran WHERE id='$id'");
 
-// Hapus juga jadwal terkait (jika kamu menggunakan tabel jadwal)
+// Hapus juga jadwal terkait
 mysqli_query($conn, "DELETE FROM jadwal WHERE daerah IN (SELECT daerah FROM pendaftaran WHERE id='$id')");
 
 // Hapus session pendaftar
@@ -30,3 +30,4 @@ unset($_SESSION['pendaftar_id']);
 header("location: daftar.php?status=deleted");
 exit;
 ?>
+
